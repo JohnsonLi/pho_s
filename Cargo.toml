@@ -1,0 +1,9 @@
+[package]
+name = "phos"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+eframe = "0.31.1"
+image = "0.25.6"
+rfd = "=0.15.3"
