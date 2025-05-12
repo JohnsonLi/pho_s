@@ -1,6 +1,6 @@
 use eframe::egui::{self, Pos2, Rect, Vec2};
 
-use crate::util::image_handler::{extract_image_metadata, load_image_at_path, scale_image_to_container, LoadedImage};
+use crate::util::image_handler::{load_image_at_path, scale_image_to_container, LoadedImage};
 
 #[derive(Default)]
 pub struct Phos {
@@ -35,7 +35,6 @@ impl eframe::App for Phos {
                         if let Some(path) = rfd::FileDialog::new().pick_file() {
                             if let Some(image) = load_image_at_path(ctx, path.to_str().unwrap()) {
                                 self.loaded_image = Some(image);
-                                extract_image_metadata(path.to_str().unwrap());
                                 println!("loaded image");
                             } else {
                                 println!("failed to load image");
@@ -61,7 +60,67 @@ impl eframe::App for Phos {
             .resizable(false)
             .min_width(240.0)
             .show(ctx, |ui| {
-                ui.heading("right panel");
+                ui.heading("Image Information");
+
+                ui.separator();
+
+                if let Some(image) = &self.loaded_image {
+                    egui::Grid::new("metadata_table")
+                        .striped(true)
+                        .spacing([20.0, 4.0])
+                        .show(ui, |ui| {
+                            ui.label("Filename");
+                            ui.label(image.metadata.filename.to_string());
+                            ui.end_row();
+
+                            ui.label("Filesize");
+                            ui.label(format_file_size(image.metadata.filesize));
+                            ui.end_row();
+
+                            ui.label("Dimensions");
+                            ui.label(format!("{} x {}", image.metadata.dimensions.0, image.metadata.dimensions.1));
+                            ui.end_row();
+                        });
+                    
+                    ui.separator();
+
+                    egui::Grid::new("metadata_exif_table")
+                        .striped(true)
+                        .spacing([20.0, 4.0])
+                        .show(ui, |ui| {
+                            ui.label("Camera Make");
+                            ui.label(image.metadata.camera_make.clone().unwrap_or_default());
+                            ui.end_row();
+
+                            ui.label("Camera Model");
+                            ui.label(image.metadata.camera_model.clone().unwrap_or_default());
+                            ui.end_row();
+
+                            ui.label("Aperture");
+                            ui.label(image.metadata.aperture.clone().unwrap_or_default());
+                            ui.end_row();
+
+                            ui.label("Shutter Speed");
+                            ui.label(image.metadata.shutter_speed.clone().unwrap_or_default());
+                            ui.end_row();
+
+                            ui.label("ISO");
+                            ui.label(image.metadata.iso.clone().unwrap_or_default());
+                            ui.end_row();
+
+                            ui.label("Focal Length");
+                            ui.label(image.metadata.focal_length.clone().unwrap_or_default());
+                            ui.end_row();
+
+                            ui.label("Lens Make");
+                            ui.label(image.metadata.lens_make.clone().unwrap_or_default());
+                            ui.end_row();
+
+                            ui.label("Lens Model");
+                            ui.label(image.metadata.lens_model.clone().unwrap_or_default());
+                        });
+                }
+
             });
 
         egui::CentralPanel::default().show(ctx, |ui| {
@@ -116,5 +175,23 @@ impl eframe::App for Phos {
                 );
             }
         });
+    }
+
+    
+}
+
+fn format_file_size(size_bytes: u64) -> String {
+    const KB: u64 = 1024;
+    const MB: u64 = KB * 1024;
+    const GB: u64 = MB * 1024;
+
+    if size_bytes < KB {
+        format!("{} bytes", size_bytes)
+    } else if size_bytes < MB {
+        format!("{:.2} KB", size_bytes as f64 / KB as f64)
+    } else if size_bytes < GB {
+        format!("{:.2} MB", size_bytes as f64 / MB as f64)
+    } else {
+        format!("{:.2} GB", size_bytes as f64 / GB as f64)
     }
 }

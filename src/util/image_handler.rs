@@ -7,12 +7,12 @@ use image::GenericImageView;
 pub struct LoadedImage {
     pub texture: egui::TextureHandle,
     pub size: [usize; 2],
-    pub path: String
+    pub metadata: ImageMetadata,
 }
 
 impl LoadedImage {
-    pub fn new(texture: egui::TextureHandle, size: [usize; 2], path: String) -> Self {
-        LoadedImage { texture, size, path}
+    pub fn new(texture: egui::TextureHandle, size: [usize; 2], metadata: ImageMetadata) -> Self {
+        LoadedImage { texture, size, metadata }
     }
 }
 
@@ -30,7 +30,7 @@ pub fn load_image_at_path(ctx: &egui::Context, path: &str) -> Option<LoadedImage
             egui::TextureOptions::default()
         );
 
-        Some(LoadedImage::new(texture, [width as usize, height as usize], path.to_string()))
+        Some(LoadedImage::new(texture, [width as usize, height as usize], extract_image_metadata(path).unwrap()))
     } else {
         println!("Failed to load image");
         None
@@ -100,7 +100,11 @@ pub fn extract_image_metadata(path: &str) -> Option<ImageMetadata> {
 
         if let Ok(exif) = exif::Reader::new().read_from_container(&mut buf_reader) {
             for field in exif.fields() {
-                let tag_value =  Some(field.display_value().with_unit(field).to_string());
+                let tag_value =  Some(field.display_value()
+                                                        .with_unit(field)
+                                                        .to_string()
+                                                        .replace("\"", ""));
+                
                 match field.tag {
                     Tag::Make => {
                         metadata.camera_make = tag_value
