@@ -1,6 +1,6 @@
 use eframe::egui;
 
-use crate::util::image_handler::{LoadedImage, load_image_path_into_panel};
+use crate::util::image_handler::{LoadedImage, load_image_at_path, scale_image_to_container};
 
 #[derive(Default)]
 pub struct Phos {
@@ -25,7 +25,7 @@ impl eframe::App for Phos {
                     if ui.button("Open").clicked() {
                         // println!("open clicked");
                         if let Some(path) = rfd::FileDialog::new().pick_file() {
-                            if let Some(image) = load_image_path_into_panel(ctx, path.to_str().unwrap()) {
+                            if let Some(image) = load_image_at_path(ctx, path.to_str().unwrap()) {
                                 self.loaded_image = Some(image);
                                 println!("loaded image");
                             } else {
@@ -55,11 +55,15 @@ impl eframe::App for Phos {
             });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            if let Some(image) = &self.loaded_image {
-                ui.image(&image.texture);
-            } else {
-                ui.heading("No image loaded");
-            }
+            // if let Some(image) = &self.loaded_image {
+            //     ui.image(&image.texture);
+            // } else {
+            //     ui.heading("No image loaded");
+            // }
+            // if let Some(image) = &self.loaded_image {
+            //     image.texture
+            // }
+            // let scaled_size = scale_image_to_container(&self.loaded_image.tex);
         });
     }
 }

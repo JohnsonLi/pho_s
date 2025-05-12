@@ -1,4 +1,4 @@
-use eframe::egui;
+use eframe::egui::{self, Vec2};
 use image::GenericImageView;
 
 pub struct LoadedImage {
@@ -12,7 +12,7 @@ impl LoadedImage {
     }
 }
 
-pub fn load_image_path_into_panel(ctx: &egui::Context, path: &str) -> Option<LoadedImage> {
+pub fn load_image_at_path(ctx: &egui::Context, path: &str) -> Option<LoadedImage> {
     if let Ok(image) = image::open(path) {
         let resized_image = image.resize(600, 600, image::imageops::FilterType::Nearest);
         let (width, height) = resized_image.dimensions();
@@ -32,4 +32,12 @@ pub fn load_image_path_into_panel(ctx: &egui::Context, path: &str) -> Option<Loa
         println!("Failed to load image");
         None
     }
+}
+
+pub fn scale_image_to_container(image_size: Vec2, container_size: Vec2) -> Vec2 {
+    let scale_x = container_size.x / image_size.x;
+    let scale_y = container_size.y / image_size.y;
+    let scale = scale_x.min(scale_y);
+
+    Vec2::new(image_size.x * scale, image_size.y * scale)
 }
