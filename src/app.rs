@@ -1,4 +1,4 @@
-use eframe::egui;
+use eframe::egui::{self, Pos2, Rect, Vec2};
 
 use crate::util::image_handler::{LoadedImage, load_image_at_path, scale_image_to_container};
 
@@ -23,7 +23,6 @@ impl eframe::App for Phos {
             egui::menu::bar(ui, |ui| {
                 ui.menu_button("Open", |ui| {
                     if ui.button("Open").clicked() {
-                        // println!("open clicked");
                         if let Some(path) = rfd::FileDialog::new().pick_file() {
                             if let Some(image) = load_image_at_path(ctx, path.to_str().unwrap()) {
                                 self.loaded_image = Some(image);
@@ -39,13 +38,14 @@ impl eframe::App for Phos {
                 });
             });
         });
-        
-        // egui::SidePanel::left("left_panel")
-        //     .resizable(false)
-        //     .default_width(120.0)
-        //     .show(ctx, |ui| {
-        //         ui.heading("left panel");
-        //     });
+
+        egui::TopBottomPanel::bottom("bottom_panel")
+            .resizable(false)
+            .min_height(140.0)
+            .show(ctx, |ui| {
+                ui.heading("bottom panel")
+            }
+        );
 
         egui::SidePanel::right("right_panel")
             .resizable(false)
@@ -55,15 +55,21 @@ impl eframe::App for Phos {
             });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            // if let Some(image) = &self.loaded_image {
-            //     ui.image(&image.texture);
-            // } else {
-            //     ui.heading("No image loaded");
-            // }
-            // if let Some(image) = &self.loaded_image {
-            //     image.texture
-            // }
-            // let scaled_size = scale_image_to_container(&self.loaded_image.tex);
+            if let Some(image) = &self.loaded_image {
+                let painter = ui.painter();
+
+                let available_rect = ui.max_rect();
+                let image_size = Vec2::new(image.size[0] as f32, image.size[1] as f32);
+                let scaled_size = scale_image_to_container(image_size, available_rect.size());
+                let top_left = available_rect.center() - scaled_size / 2.0;
+
+                painter.image(
+                    image.texture.id(),
+                    Rect::from_min_size(top_left, scaled_size),
+                    Rect::from_min_max(Pos2::ZERO, Pos2::new(1.0, 1.0)),
+                    egui::Color32::WHITE
+                );
+            }
         });
     }
 }
