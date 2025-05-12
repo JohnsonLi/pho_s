@@ -1,7 +1,8 @@
 use std::{fs::File, io::BufReader};
 
-use eframe::egui::{self, Image, Vec2};
-use image::{metadata, GenericImageView};
+use eframe::egui::{self, Vec2};
+use exif::Tag;
+use image::GenericImageView;
 
 pub struct LoadedImage {
     pub texture: egui::TextureHandle,
@@ -47,7 +48,6 @@ pub fn scale_image_to_container(image_size: Vec2, container_size: Vec2) -> Vec2 
 pub struct ImageMetadata {
     pub filename: String,
     pub filesize: u64,
-    pub format: String,
     pub dimensions: (u32, u32),
 
     // exif
@@ -55,8 +55,8 @@ pub struct ImageMetadata {
     pub camera_model: Option<String>,
     pub aperture: Option<String>,
     pub shutter_speed: Option<String>,
-    pub iso: Option<u32>,
-    pub focal_length: Option<f32>,
+    pub iso: Option<String>,
+    pub focal_length: Option<String>,
 
     pub lens_make: Option<String>,
     pub lens_model: Option<String>
@@ -67,7 +67,6 @@ impl ImageMetadata {
         ImageMetadata { 
             filename: String::new(),
             filesize: 0,
-            format: String::new(),
             dimensions: (0, 0),
             camera_make: None,
             camera_model: None,
@@ -84,17 +83,59 @@ impl ImageMetadata {
 pub fn extract_image_metadata(path: &str) -> Option<ImageMetadata> {
     let mut metadata = ImageMetadata::new();
 
+    if let Some(filename) = std::path::Path::new(path).file_name() {
+        metadata.filename = filename.to_string_lossy().to_string();
+    }
 
-    // let file = std::fs::File::open(path).ok()?;
-    // let mut buf_reader = std::io::BufReader::new(&file);
-    // let exif_reader = exif::Reader::new();
-    // let exif = exif_reader.read_from_container(&mut buf_reader).ok()?;
+    if let Ok(file_info) = std::fs::metadata(path) {
+        metadata.filesize = file_info.len();
+    }
 
-    // metadata.camera_make = exif.fields()[0];
+    if let Ok(image) = image::open(path) {
+        metadata.dimensions = image.dimensions();
+    } 
 
-    // for f in exif.fields() {
-    //     println!("{} {} {}", f.tag, f.ifd_num, f.display_value().with_unit(&exif));
-    // }
+    if let Ok(file) = File::open(path) {
+        let mut buf_reader = BufReader::new(file);
+
+        if let Ok(exif) = exif::Reader::new().read_from_container(&mut buf_reader) {
+            for field in exif.fields() {
+                let tag_value =  Some(field.display_value().with_unit(field).to_string());
+                match field.tag {
+                    Tag::Make => {
+                        metadata.camera_make = tag_value
+                    },
+                    Tag::Model => {
+                        metadata.camera_model = tag_value
+                    },
+                    Tag::FNumber => {
+                        metadata.aperture = tag_value
+                    },
+                    Tag::ExposureTime => {
+                        metadata.shutter_speed = tag_value
+                    },
+                    Tag::PhotographicSensitivity => {
+                        metadata.iso = tag_value
+                    },
+                    Tag::FocalLength => {
+                        metadata.focal_length = tag_value
+                    },
+                    Tag::LensMake => {
+                        metadata.lens_make = tag_value
+                    },
+                    Tag::LensModel => {
+                        metadata.lens_model = tag_value
+                    },
+                    _ => {
+                        // ignore
+                    }
+                }
+            }
+        }
+    } else {
+        println!("Failed to open file");
+        return None;
+    }
 
     Some(metadata)
 }
