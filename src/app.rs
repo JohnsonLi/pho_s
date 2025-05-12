@@ -57,8 +57,7 @@ impl eframe::App for Phos {
         );
 
         egui::SidePanel::right("right_panel")
-            .resizable(false)
-            .min_width(240.0)
+            .min_width(280.0)
             .show(ctx, |ui| {
                 ui.heading("Image Information");
 
@@ -132,7 +131,7 @@ impl eframe::App for Phos {
                         let old_zoom = self.zoom;
 
                         self.zoom *= 1.0 + i.smooth_scroll_delta.y * 0.003;
-                        self.zoom = self.zoom.clamp(0.1, 10.0);
+                        self.zoom = self.zoom.clamp(0.4, 10.0);
                         
                         let zoom_factor = self.zoom / old_zoom;
                         
