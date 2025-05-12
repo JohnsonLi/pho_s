@@ -12,6 +12,23 @@ impl LoadedImage {
     }
 }
 
+pub struct ImageMetadata {
+    pub filename: String,
+    pub filesize: u64,
+    pub format: String,
+    pub dimensions: (u32, u32),
+
+    // exif
+    pub camera_make: Option<String>,
+    pub camera_model: Option<String>,
+    pub aperture: Option<String>,
+    pub shutter_speed: Option<String>,
+
+
+
+
+}
+
 pub fn load_image_at_path(ctx: &egui::Context, path: &str) -> Option<LoadedImage> {
     if let Ok(image) = image::open(path) {
         let (width, height) = image.dimensions();
@@ -40,3 +57,5 @@ pub fn scale_image_to_container(image_size: Vec2, container_size: Vec2) -> Vec2 
 
     Vec2::new(image_size.x * scale, image_size.y * scale)
 }
+
+// pub fn extract_image_metadata()
