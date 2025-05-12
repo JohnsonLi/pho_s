@@ -1,6 +1,6 @@
 use eframe::egui::{self, Pos2, Rect, Vec2};
 
-use crate::util::image_handler::{LoadedImage, load_image_at_path, scale_image_to_container};
+use crate::util::image_handler::{extract_image_metadata, load_image_at_path, scale_image_to_container, LoadedImage};
 
 #[derive(Default)]
 pub struct Phos {
@@ -35,6 +35,7 @@ impl eframe::App for Phos {
                         if let Some(path) = rfd::FileDialog::new().pick_file() {
                             if let Some(image) = load_image_at_path(ctx, path.to_str().unwrap()) {
                                 self.loaded_image = Some(image);
+                                extract_image_metadata(path.to_str().unwrap());
                                 println!("loaded image");
                             } else {
                                 println!("failed to load image");
