@@ -35,6 +35,9 @@ impl eframe::App for Phos {
                         if let Some(path) = rfd::FileDialog::new().pick_file() {
                             if let Some(image) = load_image_at_path(ctx, path.to_str().unwrap()) {
                                 self.loaded_image = Some(image);
+                                self.zoom = 1.0;
+                                self.pan = Vec2::ZERO;
+                                self.prev_mouse_pos = None;
                                 println!("loaded image");
                             } else {
                                 println!("failed to load image");
@@ -60,67 +63,41 @@ impl eframe::App for Phos {
             .min_width(280.0)
             .show(ctx, |ui| {
                 ui.heading("Image Information");
-
                 ui.separator();
+
+                let available_width = ui.available_width();
+                let label_width = 100.0;
+                let value_width = available_width - label_width;
 
                 if let Some(image) = &self.loaded_image {
                     egui::Grid::new("metadata_table")
                         .striped(true)
                         .spacing([20.0, 4.0])
                         .show(ui, |ui| {
-                            ui.label("Filename");
-                            ui.label(image.metadata.filename.to_string());
-                            ui.end_row();
-
-                            ui.label("Filesize");
-                            ui.label(format_file_size(image.metadata.filesize));
-                            ui.end_row();
-
-                            ui.label("Dimensions");
-                            ui.label(format!("{} x {}", image.metadata.dimensions.0, image.metadata.dimensions.1));
-                            ui.end_row();
+                            add_row(ui, "File Name", image.metadata.filename.clone(), value_width);
+                            add_row(ui, "File Size", format_file_size(image.metadata.filesize), value_width);
+                            add_row(ui, "Dimensions", format!("{} x {}", image.metadata.dimensions.0, image.metadata.dimensions.1), value_width);
                         });
                     
+
                     ui.separator();
 
                     egui::Grid::new("metadata_exif_table")
                         .striped(true)
                         .spacing([20.0, 4.0])
                         .show(ui, |ui| {
-                            ui.label("Camera Make");
-                            ui.label(image.metadata.camera_make.clone().unwrap_or_default());
-                            ui.end_row();
-
-                            ui.label("Camera Model");
-                            ui.label(image.metadata.camera_model.clone().unwrap_or_default());
-                            ui.end_row();
-
-                            ui.label("Aperture");
-                            ui.label(image.metadata.aperture.clone().unwrap_or_default());
-                            ui.end_row();
-
-                            ui.label("Shutter Speed");
-                            ui.label(image.metadata.shutter_speed.clone().unwrap_or_default());
-                            ui.end_row();
-
-                            ui.label("ISO");
-                            ui.label(image.metadata.iso.clone().unwrap_or_default());
-                            ui.end_row();
-
-                            ui.label("Focal Length");
-                            ui.label(image.metadata.focal_length.clone().unwrap_or_default());
-                            ui.end_row();
-
-                            ui.label("Lens Make");
-                            ui.label(image.metadata.lens_make.clone().unwrap_or_default());
-                            ui.end_row();
-
-                            ui.label("Lens Model");
-                            ui.label(image.metadata.lens_model.clone().unwrap_or_default());
+                            add_row(ui, "Camera Make", image.metadata.camera_make.clone().unwrap_or_default(), value_width);
+                            add_row(ui, "Camera Model", image.metadata.camera_model.clone().unwrap_or_default(), value_width);
+                            add_row(ui, "Aperture", image.metadata.aperture.clone().unwrap_or_default(), value_width);
+                            add_row(ui, "Shutter Speed", image.metadata.shutter_speed.clone().unwrap_or_default(), value_width);
+                            add_row(ui, "ISO", image.metadata.iso.clone().unwrap_or_default(), value_width);
+                            add_row(ui, "Focal Length", image.metadata.focal_length.clone().unwrap_or_default(), value_width);
+                            add_row(ui, "Lens Make", image.metadata.lens_make.clone().unwrap_or_default(), value_width);
+                            add_row(ui, "Lens Model", image.metadata.lens_model.clone().unwrap_or_default(), value_width);
                         });
-                }
-
-            });
+                } 
+            }
+        );
 
         egui::CentralPanel::default().show(ctx, |ui| {
             let response = ui.allocate_rect(ui.max_rect(), egui::Sense::click_and_drag());
@@ -177,6 +154,18 @@ impl eframe::App for Phos {
     }
 
     
+}
+
+fn add_row(ui: &mut egui::Ui, label: &str, value: String, value_width: f32) {
+    ui.label(label);
+
+    // let rich_text = egui::RichText::new(value);
+    ui.scope(|ui| {
+        ui.set_max_width(value_width);
+        ui.add(egui::Label::new(value)
+            .truncate());
+    });
+    ui.end_row();
 }
 
 fn format_file_size(size_bytes: u64) -> String {
