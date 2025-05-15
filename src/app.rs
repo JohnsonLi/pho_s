@@ -48,6 +48,7 @@ impl eframe::App for Phos {
                                 println!("failed to load image");
                             }
                         }
+                        ui.close_menu();
                     }
 
                     if ui.button("Open Folder").clicked() {
@@ -97,6 +98,7 @@ impl eframe::App for Phos {
 
         egui::SidePanel::right("right_panel")
             .min_width(280.0)
+            .max_width(400.0)
             .show(ctx, |ui| {
                 ui.heading("Image Information");
                 ui.separator();
