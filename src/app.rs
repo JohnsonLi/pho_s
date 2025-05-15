@@ -2,6 +2,7 @@ use std::path::PathBuf;
 
 use eframe::egui::{self, Pos2, Vec2};
 
+use crate::handlers::input_handler::handle_keystrokes;
 use crate::util::image_handler::LoadedImage;
 use crate::views::folder_panel::draw_bottom_panel;
 use crate::views::image_view::draw_image_view;
@@ -11,15 +12,16 @@ use crate::views::status_bar::draw_status_bar;
 
 #[derive(Default)]
 pub struct Phos {
-    loaded_image: Option<LoadedImage>,
-    zoom: f32,
+    pub loaded_image: Option<LoadedImage>,
+    pub zoom: f32,
 
     // panning
-    pan: Vec2,
-    prev_mouse_pos: Option<Pos2>,
+    pub pan: Vec2,
+    pub prev_mouse_pos: Option<Pos2>,
 
-    current_folder_path: PathBuf,
-    current_folder_images:  Vec<PathBuf>
+    pub current_folder_path: PathBuf,
+    pub current_folder_images:  Vec<PathBuf>,
+    pub current_image_index: usize,
 }
 
 impl Phos {
@@ -27,6 +29,8 @@ impl Phos {
         Self {
             zoom: 1.0,
             pan: Vec2::ZERO,
+            current_image_index: 0,
+            loaded_image: None,
             ..Default::default()
         }
     }
@@ -38,11 +42,12 @@ impl eframe::App for Phos {
     }
 
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        draw_menu_bar(ctx, &mut self.loaded_image, &mut self.zoom, &mut self.pan, 
-                        &mut self.prev_mouse_pos, &mut self.current_folder_path, &mut self.current_folder_images);
-        draw_status_bar(ctx, &self.current_folder_images);
-        draw_bottom_panel(ctx);
-        draw_info_panel(ctx, &self.loaded_image);
-        draw_image_view(ctx, &self.loaded_image, &mut self.zoom, &mut self.pan, &mut self.prev_mouse_pos);
+        draw_menu_bar(ctx, self);
+        draw_status_bar(ctx, self);
+        draw_bottom_panel(ctx, self);
+        draw_info_panel(ctx, self);
+        draw_image_view(ctx, self);
+
+        handle_keystrokes(ctx);
     }
 }

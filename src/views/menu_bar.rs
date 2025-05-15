@@ -1,28 +1,22 @@
 use std::path::PathBuf;
 
-use eframe::egui::{self, Pos2, Vec2};
+use eframe::egui::{self, Vec2};
 
-use crate::util::image_handler::{load_image_at_path, LoadedImage};
+use crate::{app, util::image_handler::{load_image_at_path}};
 
-pub fn draw_menu_bar(ctx: &egui::Context,
-                        loaded_image: &mut Option<LoadedImage>,
-                        zoom: &mut f32,
-                        pan: &mut Vec2,
-                        prev_mouse_pos: &mut Option<Pos2>,
-                        current_folder_path: &mut PathBuf,
-                        current_folder_images: &mut Vec<PathBuf>) {
+pub fn draw_menu_bar(ctx: &egui::Context, app: &mut app::Phos) {
     egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
         egui::menu::bar(ui, |ui| {
             ui.menu_button("Open", |ui| {
                 if ui.button("Open File").clicked() {
                     if let Some(path) = rfd::FileDialog::new().pick_file() {
                         if let Some(image) = load_image_at_path(ctx, path.to_str().unwrap()) {
-                            *loaded_image = Some(image);
-                            *zoom = 1.0;
-                            *pan = Vec2::ZERO;
-                            *prev_mouse_pos = None;
-                            *current_folder_path = PathBuf::new();
-                            *current_folder_images = vec![];
+                            app.loaded_image = Some(image);
+                            app.zoom = 1.0;
+                            app.pan = Vec2::ZERO;
+                            app.prev_mouse_pos = None;
+                            app.current_folder_path = PathBuf::new();
+                            app.current_folder_images = vec![];
                             println!("loaded image");
                         } else {
                             println!("failed to load image");
@@ -33,8 +27,8 @@ pub fn draw_menu_bar(ctx: &egui::Context,
 
                 if ui.button("Open Folder").clicked() {
                     if let Some(path) = rfd::FileDialog::new().pick_folder() {
-                        let valid_formats = vec!["jpg", "jpeg", "png", "webp"];
-                        *current_folder_path = path.clone();
+                        let valid_formats = vec!["jpg", "jpeg", "png", "webp", "arw"];
+                        app.current_folder_path = path.clone();
                         
                         let mut image_paths: Vec<PathBuf> = path.read_dir()
                             .unwrap()
@@ -42,7 +36,7 @@ pub fn draw_menu_bar(ctx: &egui::Context,
                                 let path = entry.unwrap().path();
                                 if path.is_file() {
                                     if let Some(ext) = path.extension() {
-                                        if valid_formats.contains(&ext.to_str().unwrap()) {
+                                        if valid_formats.contains(&ext.to_str().unwrap().to_lowercase().as_str()) {
                                             return Some(path);
                                         }
                                     }
@@ -56,9 +50,19 @@ pub fn draw_menu_bar(ctx: &egui::Context,
                                 .cmp(&b.file_name().unwrap_or_default())
                         });
                         
-                        *current_folder_images = image_paths;
+                        app.current_folder_images = image_paths;
+                        app.current_image_index = 0;
 
-                        println!("{:?}", *current_folder_images);
+                        if let Some(image) = load_image_at_path(ctx, app.current_folder_images[0].to_str().unwrap()) {
+                            app.loaded_image = Some(image);
+                            app.zoom = 1.0;
+                            app.pan = Vec2::ZERO;
+                            app.prev_mouse_pos = None;
+                        } else {
+                            println!("failed to load image");
+                        }
+
+                        println!("{:?}", app.current_folder_images);
                     }
                 }
                 if ui.button("Quit").clicked() {

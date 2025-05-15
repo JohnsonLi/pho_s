@@ -1,8 +1,8 @@
 use eframe::egui;
 
-use crate::util::image_handler::LoadedImage;
+use crate::{app};
 
-pub fn draw_info_panel(ctx: &egui::Context, loaded_image: &Option<LoadedImage>) {
+pub fn draw_info_panel(ctx: &egui::Context, app: &mut app::Phos) {
     egui::SidePanel::right("right_panel")
         .min_width(280.0)
         .max_width(400.0)
@@ -14,7 +14,7 @@ pub fn draw_info_panel(ctx: &egui::Context, loaded_image: &Option<LoadedImage>) 
             let label_width = 100.0;
             let value_width = available_width - label_width;
 
-            if let Some(image) = loaded_image {
+            if let Some(image) = &app.loaded_image {
                 egui::Grid::new("metadata_table")
                     .striped(true)
                     .spacing([20.0, 4.0])
