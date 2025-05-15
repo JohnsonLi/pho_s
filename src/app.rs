@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use eframe::egui::{self, Pos2, Rect, Vec2};
 
 use crate::util::image_handler::{load_image_at_path, scale_image_to_container, LoadedImage};
@@ -9,7 +11,10 @@ pub struct Phos {
 
     // panning
     pan: Vec2,
-    prev_mouse_pos: Option<Pos2>
+    prev_mouse_pos: Option<Pos2>,
+
+    current_folder_path: PathBuf,
+    current_folder_images:  Vec<PathBuf>
 }
 
 impl Phos {
@@ -31,7 +36,7 @@ impl eframe::App for Phos {
         egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
                 ui.menu_button("Open", |ui| {
-                    if ui.button("Open").clicked() {
+                    if ui.button("Open File").clicked() {
                         if let Some(path) = rfd::FileDialog::new().pick_file() {
                             if let Some(image) = load_image_at_path(ctx, path.to_str().unwrap()) {
                                 self.loaded_image = Some(image);
@@ -42,6 +47,37 @@ impl eframe::App for Phos {
                             } else {
                                 println!("failed to load image");
                             }
+                        }
+                    }
+
+                    if ui.button("Open Folder").clicked() {
+                        if let Some(path) = rfd::FileDialog::new().pick_folder() {
+                            let valid_formats = vec!["jpg", "jpeg", "png", "webp"];
+                            self.current_folder_path = path.clone();
+                            
+                            let mut image_paths: Vec<PathBuf> = path.read_dir()
+                                .unwrap()
+                                .filter_map(|entry| {
+                                    let path = entry.unwrap().path();
+                                    if path.is_file() {
+                                        if let Some(ext) = path.extension() {
+                                            if valid_formats.contains(&ext.to_str().unwrap()) {
+                                                return Some(path);
+                                            }
+                                        }
+                                    }
+                                    None
+                                })
+                                .collect();
+
+                            image_paths.sort_by(|a, b| {
+                                a.file_name().unwrap_or_default()
+                                 .cmp(&b.file_name().unwrap_or_default())
+                            });
+                            
+                            self.current_folder_images = image_paths;
+
+                            println!("{:?}", self.current_folder_images);
                         }
                     }
                     if ui.button("Quit").clicked() {
