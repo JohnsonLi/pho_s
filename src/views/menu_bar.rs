@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 
-use eframe::egui::{self, Vec2};
+use eframe::egui::{self};
 
-use crate::{app, util::image_handler::{load_image_at_path}};
+use crate::{app};
 
 pub fn draw_menu_bar(ctx: &egui::Context, app: &mut app::Phos) {
     egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
@@ -10,17 +10,8 @@ pub fn draw_menu_bar(ctx: &egui::Context, app: &mut app::Phos) {
             ui.menu_button("Open", |ui| {
                 if ui.button("Open File").clicked() {
                     if let Some(path) = rfd::FileDialog::new().pick_file() {
-                        if let Some(image) = load_image_at_path(ctx, path.to_str().unwrap()) {
-                            app.loaded_image = Some(image);
-                            app.zoom = 1.0;
-                            app.pan = Vec2::ZERO;
-                            app.prev_mouse_pos = None;
-                            app.current_folder_path = PathBuf::new();
-                            app.current_folder_images = vec![];
-                            println!("loaded image");
-                        } else {
-                            println!("failed to load image");
-                        }
+                        app.current_image_path = Some(path.clone());
+                        app.image_loaded = false;
                     }
                     ui.close_menu();
                 }
@@ -28,7 +19,6 @@ pub fn draw_menu_bar(ctx: &egui::Context, app: &mut app::Phos) {
                 if ui.button("Open Folder").clicked() {
                     if let Some(path) = rfd::FileDialog::new().pick_folder() {
                         let valid_formats = vec!["jpg", "jpeg", "png", "webp", "arw"];
-                        app.current_folder_path = path.clone();
                         
                         let mut image_paths: Vec<PathBuf> = path.read_dir()
                             .unwrap()
@@ -52,15 +42,8 @@ pub fn draw_menu_bar(ctx: &egui::Context, app: &mut app::Phos) {
                         
                         app.current_folder_images = image_paths;
                         app.current_image_index = 0;
-
-                        if let Some(image) = load_image_at_path(ctx, app.current_folder_images[0].to_str().unwrap()) {
-                            app.loaded_image = Some(image);
-                            app.zoom = 1.0;
-                            app.pan = Vec2::ZERO;
-                            app.prev_mouse_pos = None;
-                        } else {
-                            println!("failed to load image");
-                        }
+                        app.current_image_path = Some(app.current_folder_images[0].clone());
+                        app.image_loaded = false;
 
                         println!("{:?}", app.current_folder_images);
                     }

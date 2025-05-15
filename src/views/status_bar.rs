@@ -7,7 +7,11 @@ pub fn draw_status_bar(ctx: &egui::Context, app: &mut app::Phos) {
         .resizable(false)
         .max_height(30.0)
         .show(ctx, |ui| {
-            ui.heading(format!("{} / {}", app.current_image_index + 1, app.current_folder_images.len()));
+            if app.current_folder_images.is_empty() {
+                ui.heading(format!("{} / {}", app.current_image_index, app.current_folder_images.len()));
+            } else {
+                ui.heading(format!("{} / {}", app.current_image_index + 1, app.current_folder_images.len()));
+            }
         }
     );
 }

@@ -13,15 +13,16 @@ use crate::views::status_bar::draw_status_bar;
 #[derive(Default)]
 pub struct Phos {
     pub loaded_image: Option<LoadedImage>,
-    pub zoom: f32,
 
-    // panning
+    pub zoom: f32,
     pub pan: Vec2,
     pub prev_mouse_pos: Option<Pos2>,
 
-    pub current_folder_path: PathBuf,
     pub current_folder_images:  Vec<PathBuf>,
     pub current_image_index: usize,
+    pub current_image_path: Option<PathBuf>,
+
+    pub image_loaded: bool
 }
 
 impl Phos {
@@ -33,6 +34,12 @@ impl Phos {
             loaded_image: None,
             ..Default::default()
         }
+    }
+
+    pub fn reset_view(&mut self) {
+        self.zoom = 1.0;
+        self.pan = Vec2::ZERO;
+        self.prev_mouse_pos = None;
     }
 }
 
@@ -48,6 +55,6 @@ impl eframe::App for Phos {
         draw_info_panel(ctx, self);
         draw_image_view(ctx, self);
 
-        handle_keystrokes(ctx);
+        handle_keystrokes(ctx, self);
     }
 }

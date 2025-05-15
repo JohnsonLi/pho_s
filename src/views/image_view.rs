@@ -1,6 +1,6 @@
 use eframe::egui::{self, Pos2, Rect, Vec2};
 
-use crate::{app, util::image_handler::scale_image_to_container};
+use crate::{app, util::image_handler::{load_image_at_path, scale_image_to_container}};
 
 pub fn draw_image_view(ctx: &egui::Context, app: &mut app::Phos) {
 
@@ -37,6 +37,18 @@ pub fn draw_image_view(ctx: &egui::Context, app: &mut app::Phos) {
             }
         } else {
             app.prev_mouse_pos = None;
+        }
+
+        if !app.image_loaded {
+            if let Some(image) = app.current_image_path
+                .as_ref()
+                .and_then(|path_buf| path_buf.to_str())
+                .and_then(|path_str| load_image_at_path(ctx, path_str)) 
+            {
+                app.reset_view();
+                app.loaded_image = Some(image);
+                app.image_loaded = true;
+            }
         }
 
         if let Some(image) = &app.loaded_image {

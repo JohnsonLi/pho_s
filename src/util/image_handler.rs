@@ -20,9 +20,10 @@ pub fn load_image_at_path(ctx: &egui::Context, path: &str) -> Option<LoadedImage
     if let Ok(image) = image::open(path) {
         let (width, height) = image.dimensions();
         let rgba_image = image.to_rgba8();
-
+        
+        let texture_id = format!("img_{}", path.replace("\\", "_").replace("/", "_").replace(":", "_"));
         let texture = ctx.load_texture(
-            "loaded_image",
+            &texture_id,
             egui::ColorImage::from_rgba_unmultiplied(
                 [width as usize, height as usize],
                 &rgba_image
