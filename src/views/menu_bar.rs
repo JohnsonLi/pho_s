@@ -18,7 +18,7 @@ pub fn draw_menu_bar(ctx: &egui::Context, app: &mut app::Phos) {
 
                 if ui.button("Open Folder").clicked() {
                     if let Some(path) = rfd::FileDialog::new().pick_folder() {
-                        let valid_formats = vec!["jpg", "jpeg", "png", "webp", "arw"];
+                        let valid_formats = vec!["jpg", "jpeg", "png", "webp"];
                         
                         let mut image_paths: Vec<PathBuf> = path.read_dir()
                             .unwrap()

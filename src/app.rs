@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::path::PathBuf;
 
 use eframe::egui::{self, Pos2, Vec2};
@@ -22,7 +23,9 @@ pub struct Phos {
     pub current_image_index: usize,
     pub current_image_path: Option<PathBuf>,
 
-    pub image_loaded: bool
+    pub image_loaded: bool,
+
+    pub image_destination_keys: HashMap<String, PathBuf>
 }
 
 impl Phos {
