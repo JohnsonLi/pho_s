@@ -42,10 +42,16 @@ pub fn draw_menu_bar(ctx: &egui::Context, app: &mut app::Phos) {
                         
                         app.current_folder_images = image_paths;
                         app.current_image_index = 0;
-                        app.current_image_path = Some(app.current_folder_images[0].clone());
+
+                        if let Some(first_image) = app.current_folder_images.get(0) {
+                            app.current_image_path = Some(first_image.clone());
+                        } else {
+                            app.current_image_path = None;
+                        }
+
                         app.image_loaded = false;
 
-                        println!("{:?}", app.current_folder_images);
+                        ui.close_menu();
                     }
                 }
                 if ui.button("Quit").clicked() {

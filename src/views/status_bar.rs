@@ -27,8 +27,11 @@ pub fn draw_status_bar(ctx: &egui::Context, app: &mut app::Phos) {
                 if plus_button.clicked() {
                     println!("Add destination folder button clicked");
                     
-                    
-                    
+                    if let Some(path) = rfd::FileDialog::new().pick_folder() {
+                        println!("Added destination folder: {}", path.display());
+                        app.destination_paths.push(path);
+                    }
+
                 }
                 
                 // Optional: Add tooltip
