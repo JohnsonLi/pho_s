@@ -25,6 +25,7 @@ pub struct Phos {
 
     pub image_loaded: bool,
 
+    pub destination_paths: Vec<PathBuf>,
     pub image_destination_keys: HashMap<String, PathBuf>
 }
 
