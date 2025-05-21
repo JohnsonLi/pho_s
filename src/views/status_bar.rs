@@ -8,9 +8,7 @@ pub fn draw_status_bar(ctx: &egui::Context, app: &mut app::Phos) {
         .max_height(30.0)
         .show(ctx, |ui| {
             ui.horizontal(|ui| {
-                if app.current_folder_images.is_empty() {
-                    ui.heading(format!("{} / {}", app.current_image_index, app.current_folder_images.len()));
-                } else {
+                if !app.current_folder_images.is_empty() {
                     ui.heading(format!("{} / {}", app.current_image_index + 1, app.current_folder_images.len()));
                 }
 
@@ -29,9 +27,14 @@ pub fn draw_status_bar(ctx: &egui::Context, app: &mut app::Phos) {
                     
                     if let Some(path) = rfd::FileDialog::new().pick_folder() {
                         println!("Added destination folder: {}", path.display());
-                        app.destination_paths.push(path);
+                        // add if not already in the list
+                        if app.destination_paths.iter().any(|p| p == &path) {
+                            println!("Destination folder already exists");
+                            return;
+                        }
+                        app.destination_paths.push(path.clone());
+                        app.image_destination_keys.insert(path.clone(), String::new());
                     }
-
                 }
                 
                 // Optional: Add tooltip

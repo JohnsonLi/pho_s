@@ -26,9 +26,7 @@ pub struct Phos {
     pub image_loaded: bool,
 
     pub destination_paths: Vec<PathBuf>,
-    pub image_destination_keys: HashMap<String, PathBuf>,
-
-    pub show_hotkey_input: bool
+    pub image_destination_keys: HashMap<PathBuf, String>,
 }
 
 impl Phos {
@@ -38,7 +36,6 @@ impl Phos {
             pan: Vec2::ZERO,
             current_image_index: 0,
             loaded_image: None,
-            show_hotkey_input: false,
             ..Default::default()
         }
     }
