@@ -45,6 +45,7 @@ pub fn draw_image_view(ctx: &egui::Context, app: &mut app::Phos) {
                 .and_then(|path_buf| path_buf.to_str())
                 .and_then(|path_str| load_image_at_path(ctx, path_str)) 
             {
+                println!("Loaded image: {:?}", app.current_image_path);
                 app.reset_view();
                 app.loaded_image = Some(image);
                 app.image_loaded = true;

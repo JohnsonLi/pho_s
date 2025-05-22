@@ -16,10 +16,18 @@ pub fn draw_bottom_panel(ctx: &egui::Context, app: &mut crate::app::Phos) {
                         ui.separator();
 
                         if let Some(text) = app.image_destination_keys.get_mut(&folder) {
-                            // restrixt to 1 character
-                            ui.add(TextEdit::singleline(text)
+                            let response = ui.add(TextEdit::singleline(text)
                                 .char_limit(1)
                                 .desired_width(15.0));
+
+                            if response.has_focus() {
+                                app.keyboard_focused = true;
+                                println!("TextEdit has focus");
+                            } else if response.lost_focus() {
+                                app.keyboard_focused = false;
+                                println!("TextEdit lost focus");
+                            }
+
                         }
                         
                         if ui.button("x").clicked() {

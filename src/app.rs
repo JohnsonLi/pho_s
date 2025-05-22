@@ -27,6 +27,8 @@ pub struct Phos {
 
     pub destination_paths: Vec<PathBuf>,
     pub image_destination_keys: HashMap<PathBuf, String>,
+
+    pub keyboard_focused: bool,
 }
 
 impl Phos {
@@ -59,6 +61,8 @@ impl eframe::App for Phos {
         draw_info_panel(ctx, self);
         draw_image_view(ctx, self);
 
-        handle_keystrokes(ctx, self);
+        if !self.keyboard_focused {
+            handle_keystrokes(ctx, self);
+        }
     }
 }
