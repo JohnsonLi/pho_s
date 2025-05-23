@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use eframe::egui::{self, Pos2, Vec2};
 
 use crate::handlers::input_handler::handle_keystrokes;
-use crate::util::image_handler::LoadedImage;
+use crate::handlers::image_handler::LoadedImage;
 use crate::views::folder_panel::draw_bottom_panel;
 use crate::views::image_view::draw_image_view;
 use crate::views::info_panel::draw_info_panel;

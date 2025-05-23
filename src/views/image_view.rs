@@ -1,6 +1,6 @@
 use eframe::egui::{self, Pos2, Rect, Vec2};
 
-use crate::{app, util::image_handler::{load_image_at_path, scale_image_to_container}};
+use crate::{app, handlers::image_handler::{load_image_at_path, scale_image_to_container}};
 
 pub fn draw_image_view(ctx: &egui::Context, app: &mut app::Phos) {
 
