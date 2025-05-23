@@ -1,6 +1,6 @@
 use eframe::egui::{self};
 
-use crate::{app};
+use crate::app;
 
 pub fn handle_keystrokes(ctx: &egui::Context, app: &mut app::Phos) {
     ctx.input(|i| {
