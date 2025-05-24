@@ -18,6 +18,19 @@ impl LoadedImage {
 
 pub fn load_image_at_path(ctx: &egui::Context, path: &str) -> Option<LoadedImage> {
     if let Ok(image) = image::open(path) {
+        let metadata = extract_image_metadata(path).unwrap();
+
+        let image = match metadata.orientation {
+            Some(2) => image.fliph(),
+            Some(3) => image.rotate180(),
+            Some(4) => image.flipv(),
+            Some(5) => image.rotate90().fliph(),
+            Some(6) => image.rotate90(),
+            Some(7) => image.rotate270().fliph(),
+            Some(8) => image.rotate270(),
+            _ => image
+        };
+
         let (width, height) = image.dimensions();
         let rgba_image = image.to_rgba8();
         
@@ -31,7 +44,7 @@ pub fn load_image_at_path(ctx: &egui::Context, path: &str) -> Option<LoadedImage
             egui::TextureOptions::default()
         );
 
-        Some(LoadedImage::new(texture, [width as usize, height as usize], extract_image_metadata(path).unwrap()))
+        Some(LoadedImage::new(texture, [width as usize, height as usize], metadata))
     } else {
         println!("Failed to load image");
         None
@@ -60,7 +73,8 @@ pub struct ImageMetadata {
     pub focal_length: Option<String>,
 
     pub lens_make: Option<String>,
-    pub lens_model: Option<String>
+    pub lens_model: Option<String>,
+    pub orientation: Option<u32>
 }
 
 impl ImageMetadata {
@@ -76,7 +90,8 @@ impl ImageMetadata {
             iso: None,
             focal_length: None,
             lens_make: None,
-            lens_model: None 
+            lens_model: None,
+            orientation: None
         }
     }
 }
@@ -130,6 +145,9 @@ pub fn extract_image_metadata(path: &str) -> Option<ImageMetadata> {
                     },
                     Tag::LensModel => {
                         metadata.lens_model = tag_value
+                    },
+                    Tag::Orientation => {
+                        metadata.orientation = field.value.get_uint(0)
                     },
                     _ => {
                         // ignore
