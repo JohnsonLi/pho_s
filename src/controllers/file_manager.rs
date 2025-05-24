@@ -11,6 +11,12 @@ pub fn move_file (
     let source_file_arw = source_file.clone().with_extension("ARW");
     let destination_file_arw = destination_directory.join(source_file.file_stem().unwrap()).with_extension("ARW");
 
-    let _ = std::fs::rename(source_file, &destination_file);
-    std::fs::rename(source_file_arw, &destination_file_arw)
+    match std::fs::rename(&source_file_arw, &destination_file_arw) {
+        Ok(_) => {},
+        Err(_) => {
+            println!("Failed to move ARW file (maybe it doesn't exist): {:?}", source_file_arw);
+        }
+    }
+
+    std::fs::rename(source_file, &destination_file)
 }
