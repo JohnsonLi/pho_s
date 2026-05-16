@@ -1,6 +1,6 @@
 use eframe::egui;
 
-use crate::{app};
+use crate::{app, handlers::image_handler::format_file_size};
 
 pub fn draw_info_panel(ctx: &egui::Context, app: &mut app::Phos) {
     egui::SidePanel::right("right_panel")
@@ -56,18 +56,3 @@ fn add_row(ui: &mut egui::Ui, label: &str, value: String, value_width: f32) {
     ui.end_row();
 }
 
-fn format_file_size(size_bytes: u64) -> String {
-    const KB: u64 = 1024;
-    const MB: u64 = KB * 1024;
-    const GB: u64 = MB * 1024;
-
-    if size_bytes < KB {
-        format!("{} bytes", size_bytes)
-    } else if size_bytes < MB {
-        format!("{:.2} KB", size_bytes as f64 / KB as f64)
-    } else if size_bytes < GB {
-        format!("{:.2} MB", size_bytes as f64 / MB as f64)
-    } else {
-        format!("{:.2} GB", size_bytes as f64 / GB as f64)
-    }
-}

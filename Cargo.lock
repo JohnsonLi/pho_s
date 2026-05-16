@@ -2570,6 +2570,7 @@ dependencies = [
  "kamadak-exif",
  "rawloader",
  "rfd",
+ "tempfile",
 ]
 
 [[package]]

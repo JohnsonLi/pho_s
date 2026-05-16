@@ -1,8 +1,35 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use eframe::egui::{self};
 
 use crate::{app};
+
+pub const VALID_IMAGE_EXTENSIONS: &[&str] = &["jpg", "jpeg", "png", "webp"];
+
+pub fn collect_image_paths_sorted(dir: &Path) -> std::io::Result<Vec<PathBuf>> {
+    let mut image_paths: Vec<PathBuf> = dir
+        .read_dir()?
+        .filter_map(|entry| {
+            let path = entry.ok()?.path();
+            if !path.is_file() {
+                return None;
+            }
+            let ext = path.extension()?.to_str()?.to_lowercase();
+            if VALID_IMAGE_EXTENSIONS.contains(&ext.as_str()) {
+                Some(path)
+            } else {
+                None
+            }
+        })
+        .collect();
+
+    image_paths.sort_by(|a, b| {
+        a.file_name().unwrap_or_default()
+            .cmp(&b.file_name().unwrap_or_default())
+    });
+
+    Ok(image_paths)
+}
 
 pub fn draw_menu_bar(ctx: &egui::Context, app: &mut app::Phos) {
     egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
@@ -18,28 +45,8 @@ pub fn draw_menu_bar(ctx: &egui::Context, app: &mut app::Phos) {
 
                 if ui.button("Open Folder").clicked() {
                     if let Some(path) = rfd::FileDialog::new().pick_folder() {
-                        let valid_formats = vec!["jpg", "jpeg", "png", "webp"];
-                        
-                        let mut image_paths: Vec<PathBuf> = path.read_dir()
-                            .unwrap()
-                            .filter_map(|entry| {
-                                let path = entry.unwrap().path();
-                                if path.is_file() {
-                                    if let Some(ext) = path.extension() {
-                                        if valid_formats.contains(&ext.to_str().unwrap().to_lowercase().as_str()) {
-                                            return Some(path);
-                                        }
-                                    }
-                                }
-                                None
-                            })
-                            .collect();
+                        let image_paths = collect_image_paths_sorted(&path).unwrap_or_default();
 
-                        image_paths.sort_by(|a, b| {
-                            a.file_name().unwrap_or_default()
-                                .cmp(&b.file_name().unwrap_or_default())
-                        });
-                        
                         app.current_folder_images = image_paths;
                         app.current_image_index = 0;
 

@@ -1,6 +1,6 @@
 mod app;
-mod views;
-mod handlers;
-mod controllers;
+pub mod views;
+pub mod handlers;
+pub mod controllers;
 
 pub use app::Phos;

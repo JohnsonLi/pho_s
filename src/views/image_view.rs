@@ -2,6 +2,21 @@ use eframe::egui::{self, Pos2, Rect, Vec2};
 
 use crate::{app, handlers::image_handler::{load_image_at_path, scale_image_to_container}};
 
+pub const ZOOM_MIN: f32 = 0.4;
+pub const ZOOM_MAX: f32 = 10.0;
+pub const ZOOM_SCROLL_SENSITIVITY: f32 = 0.003;
+
+pub fn apply_zoom_delta(zoom: f32, scroll_y: f32) -> f32 {
+    (zoom * (1.0 + scroll_y * ZOOM_SCROLL_SENSITIVITY)).clamp(ZOOM_MIN, ZOOM_MAX)
+}
+
+pub fn pan_toward_cursor(zoom_before: f32, zoom_after: f32, mouse_to_center: Vec2, pan: Vec2) -> Vec2 {
+    let zoom_factor = zoom_after / zoom_before;
+    let new_mouse_to_center = mouse_to_center * zoom_factor;
+    let pan_delta = new_mouse_to_center - mouse_to_center;
+    pan - pan_delta
+}
+
 pub fn draw_image_view(ctx: &egui::Context, app: &mut app::Phos) {
 
     egui::CentralPanel::default().show(ctx, |ui| {
@@ -12,17 +27,12 @@ pub fn draw_image_view(ctx: &egui::Context, app: &mut app::Phos) {
                 if let Some(mouse_pos) = i.pointer.hover_pos() {
                     let old_zoom = app.zoom;
 
-                    app.zoom *= 1.0 + i.smooth_scroll_delta.y * 0.003;
-                    app.zoom = app.zoom.clamp(0.4, 10.0);
-                    
-                    let zoom_factor = app.zoom / old_zoom;
-                    
+                    app.zoom = apply_zoom_delta(app.zoom, i.smooth_scroll_delta.y);
+
                     let image_center = ui.max_rect().center() + app.pan;
                     let mouse_to_center = mouse_pos - image_center;
-                    
-                    let new_mouse_to_center = mouse_to_center * zoom_factor;
-                    let pan_delta = new_mouse_to_center - mouse_to_center;
-                    app.pan -= pan_delta;
+
+                    app.pan = pan_toward_cursor(old_zoom, app.zoom, mouse_to_center, app.pan);
                 }
             });
         }
@@ -43,7 +53,7 @@ pub fn draw_image_view(ctx: &egui::Context, app: &mut app::Phos) {
             if let Some(image) = app.current_image_path
                 .as_ref()
                 .and_then(|path_buf| path_buf.to_str())
-                .and_then(|path_str| load_image_at_path(ctx, path_str)) 
+                .and_then(|path_str| load_image_at_path(ctx, path_str))
             {
                 println!("Loaded image: {:?}", app.current_image_path);
                 app.reset_view();
