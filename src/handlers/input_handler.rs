@@ -45,12 +45,15 @@ pub fn find_destination_for_key<'a>(
 pub fn handle_keystrokes(ctx: &egui::Context, app: &mut app::Phos) {
     ctx.input(|i| {
         if i.key_pressed(egui::Key::ArrowRight) {
+            let prev = app.current_image_index;
             app.current_image_index = next_index(app.current_image_index, app.current_folder_images.len());
 
             if app.current_folder_images.len() > 0 {
                 app.current_image_path = Some(app.current_folder_images[app.current_image_index].clone());
                 println!("Current image path: {:?}", app.current_image_path);
-                app.image_loaded = false;
+                if app.current_image_index != prev {
+                    app.image_loaded = false;
+                }
             } else {
                 println!("No images in the folder or no folder selected.");
             }
@@ -59,12 +62,15 @@ pub fn handle_keystrokes(ctx: &egui::Context, app: &mut app::Phos) {
         }
 
         if i.key_pressed(egui::Key::ArrowLeft) {
+            let prev = app.current_image_index;
             app.current_image_index = prev_index(app.current_image_index, app.current_folder_images.len());
 
             if app.current_folder_images.len() > 0 {
                 app.current_image_path = Some(app.current_folder_images[app.current_image_index].clone());
                 println!("Current image path: {:?}", app.current_image_path);
-                app.image_loaded = false;
+                if app.current_image_index != prev {
+                    app.image_loaded = false;
+                }
             } else {
                 println!("No images in the folder or no folder selected.");
             }
