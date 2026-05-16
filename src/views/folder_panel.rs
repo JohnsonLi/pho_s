@@ -4,8 +4,20 @@ pub fn draw_bottom_panel(ctx: &egui::Context, app: &mut crate::app::Phos) {
         egui::TopBottomPanel::bottom("bottom_panel")
             .resizable(false)
             .min_height(140.0)
+            .max_height(400.0)
             .show(ctx, |ui| {
-                ui.heading("Destination Folders");
+                ui.add_space(8.0);
+                ui.horizontal(|ui| {
+                    ui.heading("Destination Folders");
+                    if ui.button("+").on_hover_text("Add destination folder").clicked() {
+                        if let Some(path) = rfd::FileDialog::new().pick_folder() {
+                            if !app.destination_paths.iter().any(|p| p == &path) {
+                                app.destination_paths.push(path.clone());
+                                app.image_destination_keys.insert(path, String::new());
+                            }
+                        }
+                    }
+                });
                 ui.separator();
 
                 let folders: Vec<_> = app.destination_paths.iter().cloned().collect();
