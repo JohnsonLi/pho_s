@@ -10,6 +10,7 @@ use crate::views::image_view::draw_image_view;
 use crate::views::info_panel::draw_info_panel;
 use crate::views::menu_bar::draw_menu_bar;
 use crate::views::status_bar::draw_status_bar;
+use crate::views::theme::apply_theme;
 
 #[derive(Default)]
 pub struct Phos {
@@ -32,7 +33,8 @@ pub struct Phos {
 }
 
 impl Phos {
-    pub fn new(_cc: &eframe::CreationContext<'_>) -> Self {
+    pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
+        apply_theme(&cc.egui_ctx);
         Self {
             zoom: 1.0,
             pan: Vec2::ZERO,

@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use eframe::egui::{self};
 
-use crate::{app};
+use crate::{app, views::theme::toggle_theme};
 
 pub const VALID_IMAGE_EXTENSIONS: &[&str] = &["jpg", "jpeg", "png", "webp"];
 
@@ -63,6 +63,13 @@ pub fn draw_menu_bar(ctx: &egui::Context, app: &mut app::Phos) {
                 }
                 if ui.button("Quit").clicked() {
                     ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+                }
+            });
+
+            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                let icon = if ctx.theme() == egui::Theme::Dark { "\u{2600}" } else { "🌙" };
+                if ui.button(icon).on_hover_text("Toggle light / dark").clicked() {
+                    toggle_theme(ctx);
                 }
             });
         });
