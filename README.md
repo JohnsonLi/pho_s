@@ -1,4 +1,4 @@
-# PhoS
+# photo_sort
 
 A keyboard-driven photo culling tool. Open a folder of photos, browse them with
 arrow keys, and use single-letter shortcuts to move each one into a destination
