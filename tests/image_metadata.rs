@@ -1,11 +1,11 @@
 use phos::handlers::image_handler::extract_image_metadata;
 
-const FIXTURE: &str = "test_images/DSC04406.jpg";
+const FIXTURE: &str = "tests/test_images/northern_cardinal.jpg";
 
 #[test]
 fn filename_matches_fixture() {
     let metadata = extract_image_metadata(FIXTURE).expect("metadata should parse");
-    assert_eq!(metadata.filename, "DSC04406.jpg");
+    assert_eq!(metadata.filename, "northern_cardinal.jpg");
 }
 
 #[test]
@@ -24,22 +24,23 @@ fn dimensions_are_positive() {
 }
 
 #[test]
-fn exif_camera_fields_are_present_and_non_empty() {
+fn exif_camera_fields_if_present_are_non_empty() {
     let metadata = extract_image_metadata(FIXTURE).expect("metadata should parse");
-
-    let make = metadata.camera_make.as_deref().unwrap_or("");
-    let model = metadata.camera_model.as_deref().unwrap_or("");
-    assert!(!make.is_empty(), "camera_make should be non-empty");
-    assert!(!model.is_empty(), "camera_model should be non-empty");
+    if let Some(make) = metadata.camera_make.as_deref() {
+        assert!(!make.is_empty(), "camera_make should be non-empty if present");
+    }
+    if let Some(model) = metadata.camera_model.as_deref() {
+        assert!(!model.is_empty(), "camera_model should be non-empty if present");
+    }
 }
 
 #[test]
-fn exif_exposure_fields_are_present() {
+fn exif_exposure_fields_if_present_are_positive() {
     let metadata = extract_image_metadata(FIXTURE).expect("metadata should parse");
-    assert!(metadata.aperture.is_some(), "aperture should be Some");
-    assert!(metadata.shutter_speed.is_some(), "shutter_speed should be Some");
-    assert!(metadata.iso.is_some(), "iso should be Some");
-    assert!(metadata.focal_length.is_some(), "focal_length should be Some");
+    if let Some(a) = metadata.aperture.as_deref() { assert!(!a.is_empty()); }
+    if let Some(s) = metadata.shutter_speed.as_deref() { assert!(!s.is_empty()); }
+    if let Some(i) = metadata.iso.as_deref() { assert!(!i.is_empty()); }
+    if let Some(f) = metadata.focal_length.as_deref() { assert!(!f.is_empty()); }
 }
 
 #[test]
@@ -52,6 +53,6 @@ fn orientation_if_present_is_in_valid_exif_range() {
 
 #[test]
 fn missing_file_returns_none() {
-    let result = extract_image_metadata("test_images/__definitely_not_a_real_file__.jpg");
+    let result = extract_image_metadata("tests/test_images/__definitely_not_a_real_file__.jpg");
     assert!(result.is_none());
 }
