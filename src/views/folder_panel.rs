@@ -23,7 +23,12 @@ pub fn draw_bottom_panel(ctx: &egui::Context, app: &mut crate::app::Phos) {
                 let folders: Vec<_> = app.destination_paths.iter().cloned().collect();
                 for folder in folders {
                     ui.horizontal(|ui| {
-                        ui.label(folder.display().to_string());
+                        let display_name = folder
+                            .file_name()
+                            .map(|n| n.to_string_lossy().to_string())
+                            .unwrap_or_else(|| folder.display().to_string());
+                        ui.label(display_name)
+                            .on_hover_text(folder.display().to_string());
 
                         ui.separator();
 
